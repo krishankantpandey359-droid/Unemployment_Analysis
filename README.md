@@ -84,5 +84,5 @@ The analysis helps identify:
 
 This project demonstrates how Python can be used for data analysis and visualization. By analyzing unemployment data, we can understand changes in unemployment over time and differences between regions.
 
-The analysis also shows the effect of the COVID-19 period on unemployment levels in India. Data visualization makes it easier to identify important patterns and compare different regions.
+The monthly trend is the unweighted mean of the available regional unemployment rates for each month. It is not a population-weighted national unemployment estimate. The COVID-19 period comparison is descriptive and does not establish that the pandemic caused the observed change. Data visualization makes it easier to identify patterns and compare different regions.
 
