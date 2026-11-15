@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project is part of the  Data Science .
+This project analyses unemployment patterns in India across regions and time periods.
 
 The main aim of this project is to analyze unemployment data in India and understand how unemployment changed over time. The project also looks at differences between regions and the impact of the COVID-19 period on unemployment.
 
@@ -86,6 +86,3 @@ This project demonstrates how Python can be used for data analysis and visualiza
 
 The analysis also shows the effect of the COVID-19 period on unemployment levels in India. Data visualization makes it easier to identify important patterns and compare different regions.
 
-## Project Type
-
-CodeAlpha Data Science Internship - Unemployment Analysis with Python# CodeAlpha_Unemployment_Analysis
