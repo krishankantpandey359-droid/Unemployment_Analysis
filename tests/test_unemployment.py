@@ -37,6 +37,21 @@ class TestUnemploymentDataCleaning(unittest.TestCase):
         cleaned, audit = clean_unemployment_data(raw)
         self.assertEqual(len(cleaned), 1)
 
+    def test_rejects_infinite_employment_values(self):
+        raw = self.raw.iloc[:2].copy()
+        raw.loc[0, "Estimated Employed"] = float("inf")
+        cleaned, audit = clean_unemployment_data(raw)
+        self.assertEqual(len(cleaned), 1)
+        self.assertEqual(audit["invalid_rows_removed"], 1)
+
+    def test_rejects_invalid_dates_and_blank_regions(self):
+        raw = self.raw.iloc[:2].copy()
+        raw.loc[0, "Date"] = "not-a-date"
+        raw.loc[1, "Region"] = "   "
+        cleaned, audit = clean_unemployment_data(raw)
+        self.assertTrue(cleaned.empty is False)
+        self.assertEqual(audit["invalid_rows_removed"], 2)
+
     def test_missing_required_column_fails(self):
         with self.assertRaisesRegex(ValueError, "Missing required columns"):
             clean_unemployment_data(self.raw.drop(columns=["Region"]))
