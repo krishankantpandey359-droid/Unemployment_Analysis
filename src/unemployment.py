@@ -1,6 +1,7 @@
 """Validation helpers for the India unemployment EDA notebook."""
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
 REQUIRED_COLUMNS = [
@@ -31,8 +32,10 @@ def clean_unemployment_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     duplicate_rows = int(df.duplicated().sum())
     df = df.drop_duplicates().copy()
 
+    finite_numeric = np.isfinite(df[NUMERIC_COLUMNS].to_numpy(dtype=float)).all(axis=1)
     valid = (
-        df["Region"].notna()
+        finite_numeric
+        & df["Region"].notna()
         & df["Region"].ne("")
         & df["Date"].notna()
         & df["Estimated Unemployment Rate (%)"].between(0, 100)
