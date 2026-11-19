@@ -16,12 +16,16 @@ NUMERIC_COLUMNS = REQUIRED_COLUMNS[2:]
 
 def clean_unemployment_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """Validate, normalize and clean a copy of the supplied regional dataset."""
-    missing = [column for column in REQUIRED_COLUMNS if column not in raw.columns]
-    if missing:
-        raise ValueError(f"Missing required columns: {missing}")
-
+    if not isinstance(raw, pd.DataFrame):
+        raise TypeError("Expected a pandas DataFrame.")
     df = raw.copy()
     df.columns = df.columns.astype(str).str.strip()
+    if df.columns.duplicated().any():
+        duplicates = df.columns[df.columns.duplicated()].tolist()
+        raise ValueError(f"Duplicate column names after trimming whitespace: {duplicates}")
+    missing = [column for column in REQUIRED_COLUMNS if column not in df.columns]
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}")
     df["Region"] = df["Region"].astype("string").str.strip()
     df["Date"] = pd.to_datetime(df["Date"], dayfirst=True, errors="coerce")
 
