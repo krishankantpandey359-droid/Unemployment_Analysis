@@ -1,0 +1,40 @@
+name: Unemployment analysis checks
+
+on:
+  push:
+    branches: [main, "audit/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-and-execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Compile source and tests
+        run: python -m compileall -q src tests
+      - name: Run data validation tests
+        run: python -m unittest discover -s tests -v
+      - name: Execute complete notebook
+        run: jupyter nbconvert --to notebook --execute "CodeAlpha_Unemployment_Analysis (1).ipynb" --output executed_notebook.ipynb --ExecutePreprocessor.timeout=600
+      - name: Verify notebook execution
+        run: |
+          python - <<'PY'
+          import nbformat
+          from pathlib import Path
+          notebook = nbformat.read("executed_notebook.ipynb", as_version=4)
+          cells = [cell for cell in notebook.cells if cell.cell_type == "code" and cell.source.strip()]
+          errors = [(i, out.ename, out.evalue) for i, cell in enumerate(notebook.cells) for out in cell.get("outputs", []) if out.output_type == "error"]
+          assert cells and all(cell.execution_count is not None for cell in cells)
+          assert not errors, errors
+          print(f"PASS: {len(cells)} code cells executed without errors.")
+          PY
