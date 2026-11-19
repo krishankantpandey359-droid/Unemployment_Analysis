@@ -72,3 +72,24 @@ class TestUnemploymentDataCleaning(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_trims_column_whitespace_before_required_column_validation(self):
+        raw = self.raw.rename(columns={
+            "Region": " Region ",
+            "Date": " Date ",
+        })
+        cleaned, audit = clean_unemployment_data(raw)
+        self.assertEqual(len(cleaned), 2)
+        self.assertIn("Region", cleaned.columns)
+        self.assertIn("Date", cleaned.columns)
+
+    def test_rejects_duplicate_columns_after_whitespace_normalization(self):
+        raw = self.raw.copy()
+        raw[" Region "] = raw["Region"]
+        with self.assertRaisesRegex(ValueError, "Duplicate column names"):
+            clean_unemployment_data(raw)
+
+    def test_rejects_non_dataframe_input(self):
+        with self.assertRaisesRegex(TypeError, "DataFrame"):
+            clean_unemployment_data([{"Region": "A"}])
