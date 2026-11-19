@@ -2,87 +2,67 @@
 
 ## Project Overview
 
-This project analyses unemployment patterns in India across regions and time periods.
+This project analyses unemployment patterns across regions of India using the CodeAlpha-style unemployment dataset. The notebook covers data cleaning, monthly regional trends, region-wise comparisons, pre-COVID versus COVID-period descriptions, correlation, and visual summaries.
 
-The main aim of this project is to analyze unemployment data in India and understand how unemployment changed over time. The project also looks at differences between regions and the impact of the COVID-19 period on unemployment.
+## Dataset and provenance
 
-## Dataset
+The notebook loads the public CSV from the following source:
 
-The dataset contains unemployment-related information for different regions of India.
+- [Unemployment_Rate_upto_11_2020.csv, GitHub source](https://raw.githubusercontent.com/SaiyamTuteja/EMPLOYMENT_AND_UNEMPLOYMENT_DATA_ANALYSIS/master/Unemployment_Rate_upto_11_2020.csv)
+- [Upstream repository](https://github.com/SaiyamTuteja/EMPLOYMENT_AND_UNEMPLOYMENT_DATA_ANALYSIS)
 
-The main columns used in the dataset are:
+The filename indicates coverage through November 2020. The analysis should be treated as a historical dataset exercise, not a current unemployment dashboard. The repository does not bundle a fixed CSV snapshot, so rerunning the notebook depends on the availability and unchanged contents of the upstream file.
 
+Main fields:
 - Region
 - Date
 - Estimated Unemployment Rate (%)
 - Estimated Employed
 - Estimated Labour Participation Rate (%)
 
-## Project Objectives
+## Analysis performed
 
-The main objectives of this project are:
+1. Load the public CSV.
+2. Inspect columns, types, missing values, and summary statistics.
+3. Normalize column names and validate required fields.
+4. Parse dates and numeric measures.
+5. Remove exact duplicate records and invalid rows.
+6. Calculate monthly means of the available regional unemployment rates.
+7. Compare unemployment across regions.
+8. Compare pre-COVID and COVID periods descriptively.
+9. Explore correlations among the supplied numeric fields.
+10. Visualize the main patterns.
 
-1. To understand the unemployment situation in different regions.
-2. To study the unemployment rate over time.
-3. To compare unemployment before and during the COVID-19 period.
-4. To identify regions with higher average unemployment.
-5. To understand the relationship between employment and unemployment-related variables.
-6. To visualize the important patterns in the data.
+## Interpretation and limitations
 
-## Project Steps
+- The monthly trend is the unweighted mean of available regional unemployment rates. It is not a population-weighted national unemployment estimate.
+- Region-level comparisons are descriptive. Differences in regional coverage and record counts can affect the mean.
+- The pre-COVID versus COVID comparison does not establish that COVID caused the observed changes.
+- Correlation does not establish causation.
+- The data ends around November 2020 based on the source file name. It does not represent current labour-market conditions.
+- The upstream CSV is fetched at notebook runtime and is not pinned to a commit in this repository. For strict reproducibility, archive an approved snapshot with its retrieval date and checksum.
+- Cleaning rules remove rows with invalid dates, non-finite values, out-of-range percentage values, negative employment, or blank region names. Review the audit output before interpreting results.
 
-The following steps were performed in this project:
+## Reusable validation module
 
-1. Imported the required Python libraries.
-2. Loaded the unemployment dataset.
-3. Checked the structure and data types.
-4. Checked missing values and duplicate records.
-5. Cleaned the dataset.
-6. Converted the date column into the correct date format.
-7. Performed Exploratory Data Analysis (EDA).
-8. Analyzed the monthly unemployment trend.
-9. Compared unemployment rates across different regions.
-10. Compared the pre-COVID and COVID periods.
-11. Identified the highest unemployment observation.
-12. Created a correlation heatmap.
-13. Created visualizations to understand the data.
-14. Summarized the major findings.
+`src/unemployment.py` provides:
+- Required-column validation after trimming header whitespace.
+- Duplicate-column detection after normalization.
+- Date and numeric parsing.
+- Exact duplicate removal.
+- Range and finite-value validation.
+- A row-count audit before and after cleaning.
 
-## Exploratory Data Analysis
+Run tests:
 
-Different charts were created to understand the dataset, including:
+```bash
+python -m unittest discover -s tests -v
+```
 
-- Monthly unemployment trend
-- Region-wise average unemployment
-- Pre-COVID vs COVID unemployment comparison
-- Correlation heatmap
-- Employment vs unemployment analysis
+## Technologies
 
-These visualizations help in understanding how unemployment varied across regions and time periods.
+Python, Pandas, NumPy, Matplotlib, Seaborn, Jupyter Notebook, and GitHub Actions.
 
-## Key Insights
+## Author
 
-The analysis helps identify:
-
-- Changes in unemployment rates over time.
-- Regions having relatively higher unemployment rates.
-- The difference between unemployment before and during the COVID-19 period.
-- The relationship between employment and other unemployment-related variables.
-- The highest unemployment observations in the dataset.
-
-## Technologies Used
-
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Seaborn
-- Google Colab
-- Jupyter Notebook
-
-## Conclusion
-
-This project demonstrates how Python can be used for data analysis and visualization. By analyzing unemployment data, we can understand changes in unemployment over time and differences between regions.
-
-The monthly trend is the unweighted mean of the available regional unemployment rates for each month. It is not a population-weighted national unemployment estimate. The COVID-19 period comparison is descriptive and does not establish that the pandemic caused the observed change. Data visualization makes it easier to identify patterns and compare different regions.
-
+Srishti Pandey, MCA Data Science
