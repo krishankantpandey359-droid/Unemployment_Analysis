@@ -85,11 +85,11 @@ def summarize_monthly_unemployment(df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Estimated employed values must not be negative.")
 
     participation = data["Estimated Labour Participation Rate (%)"] / 100.0
-    data["Estimated Labour Force"] = np.where(
-        participation > 0,
-        data["Estimated Employed"] / participation,
-        np.nan,
-    )
+    if participation.le(0).any():
+        raise ValueError(
+            "Labour participation rate must be greater than 0 to infer labour force."
+        )
+    data["Estimated Labour Force"] = data["Estimated Employed"] / participation
     data["Unemployed Estimate"] = (
         data["Estimated Labour Force"]
         * data["Estimated Unemployment Rate (%)"] / 100.0
