@@ -72,3 +72,47 @@ class TestUnemploymentDataCleaning(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+from src.unemployment import summarize_monthly_unemployment
+
+
+def test_weighted_monthly_summary_uses_inferred_labour_force_weights():
+    raw = pd.DataFrame({
+        "Region": ["A", "B"],
+        "Date": ["31-01-2020", "31-01-2020"],
+        "Estimated Unemployment Rate (%)": [10.0, 20.0],
+        "Estimated Employed": [900.0, 800.0],
+        "Estimated Labour Participation Rate (%)": [90.0, 80.0],
+    })
+    result = summarize_monthly_unemployment(raw)
+    assert result.loc[0, "regional_mean_unemployment_pct"] == 15.0
+    # Both inferred labour forces equal 1,000, so weighted rate is 15%.
+    assert result.loc[0, "labour_force_weighted_unemployment_pct"] == 15.0
+    assert result.loc[0, "regions"] == 2
+
+
+def test_weighted_monthly_summary_rejects_invalid_rates():
+    raw = pd.DataFrame({
+        "Region": ["A"],
+        "Date": ["31-01-2020"],
+        "Estimated Unemployment Rate (%)": [101.0],
+        "Estimated Employed": [900.0],
+        "Estimated Labour Participation Rate (%)": [90.0],
+    })
+    with unittest.TestCase().assertRaisesRegex(ValueError, "between 0 and 100"):
+        summarize_monthly_unemployment(raw)
+
+
+def test_weighted_monthly_summary_rejects_zero_participation():
+    raw = pd.DataFrame({
+        "Region": ["A"],
+        "Date": ["31-01-2020"],
+        "Estimated Unemployment Rate (%)": [10.0],
+        "Estimated Employed": [0.0],
+        "Estimated Labour Participation Rate (%)": [0.0],
+    })
+    with unittest.TestCase().assertRaisesRegex(
+        ValueError, "greater than 0"
+    ):
+        summarize_monthly_unemployment(raw)
