@@ -102,3 +102,17 @@ def test_weighted_monthly_summary_rejects_invalid_rates():
     })
     with unittest.TestCase().assertRaisesRegex(ValueError, "between 0 and 100"):
         summarize_monthly_unemployment(raw)
+
+
+def test_weighted_monthly_summary_rejects_zero_participation():
+    raw = pd.DataFrame({
+        "Region": ["A"],
+        "Date": ["31-01-2020"],
+        "Estimated Unemployment Rate (%)": [10.0],
+        "Estimated Employed": [0.0],
+        "Estimated Labour Participation Rate (%)": [0.0],
+    })
+    with unittest.TestCase().assertRaisesRegex(
+        ValueError, "greater than 0"
+    ):
+        summarize_monthly_unemployment(raw)
