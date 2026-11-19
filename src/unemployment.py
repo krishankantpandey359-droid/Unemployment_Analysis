@@ -56,3 +56,56 @@ def clean_unemployment_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         "rows_after_cleaning": len(df),
     }
     return df.reset_index(drop=True), audit
+
+
+def summarize_monthly_unemployment(df: pd.DataFrame) -> pd.DataFrame:
+    """Compare simple regional mean with a labour-force-weighted estimate.
+
+    Estimated labour force is derived as employed / participation rate.
+    The weighted value is an approximation from the supplied estimates,
+    not an independently verified official national rate.
+    """
+    required = set(REQUIRED_COLUMNS)
+    missing = sorted(required - set(df.columns))
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}")
+
+    data = df.copy()
+    for column in NUMERIC_COLUMNS:
+        data[column] = pd.to_numeric(data[column], errors="coerce")
+    if data[NUMERIC_COLUMNS].isna().any().any():
+        raise ValueError("Monthly summary contains missing or non-numeric measures.")
+    if not np.isfinite(data[NUMERIC_COLUMNS].to_numpy(dtype=float)).all():
+        raise ValueError("Monthly summary contains non-finite measures.")
+    if not data["Estimated Unemployment Rate (%)"].between(0, 100).all():
+        raise ValueError("Unemployment rate must be between 0 and 100.")
+    if not data["Estimated Labour Participation Rate (%)"].between(0, 100).all():
+        raise ValueError("Labour participation rate must be between 0 and 100.")
+    if (data["Estimated Employed"] < 0).any():
+        raise ValueError("Estimated employed values must not be negative.")
+
+    participation = data["Estimated Labour Participation Rate (%)"] / 100.0
+    data["Estimated Labour Force"] = np.where(
+        participation > 0,
+        data["Estimated Employed"] / participation,
+        np.nan,
+    )
+    data["Unemployed Estimate"] = (
+        data["Estimated Labour Force"]
+        * data["Estimated Unemployment Rate (%)"] / 100.0
+    )
+    grouped = data.groupby("Date", sort=True)
+    result = grouped.agg(
+        regional_mean_unemployment_pct=(
+            "Estimated Unemployment Rate (%)", "mean"
+        ),
+        estimated_labour_force=("Estimated Labour Force", "sum"),
+        estimated_unemployed=("Unemployed Estimate", "sum"),
+        regions=("Region", "nunique"),
+    ).reset_index()
+    result["labour_force_weighted_unemployment_pct"] = np.where(
+        result["estimated_labour_force"] > 0,
+        result["estimated_unemployed"] / result["estimated_labour_force"] * 100,
+        np.nan,
+    )
+    return result
