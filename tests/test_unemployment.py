@@ -1,8 +1,12 @@
 import unittest
 
+import numpy as np
 import pandas as pd
 
-from src.unemployment import clean_unemployment_data
+from src.unemployment import (
+    clean_unemployment_data,
+    summarize_monthly_unemployment,
+)
 
 
 class TestUnemploymentDataCleaning(unittest.TestCase):
@@ -34,7 +38,7 @@ class TestUnemploymentDataCleaning(unittest.TestCase):
     def test_rejects_negative_employment(self):
         raw = self.raw.iloc[:2].copy()
         raw.loc[0, "Estimated Employed"] = -1
-        cleaned, audit = clean_unemployment_data(raw)
+        cleaned, _ = clean_unemployment_data(raw)
         self.assertEqual(len(cleaned), 1)
 
     def test_rejects_infinite_employment_values(self):
@@ -45,7 +49,7 @@ class TestUnemploymentDataCleaning(unittest.TestCase):
         self.assertEqual(len(cleaned), 1)
         self.assertEqual(audit["invalid_rows_removed"], 1)
 
-    def test_rejects_invalid_dates_and_blank_regions(self):
+    def test_rejects_invalid_dates(self):
         raw = self.raw.iloc[:2].copy()
         raw.loc[0, "Date"] = "not-a-date"
         cleaned, audit = clean_unemployment_data(raw)
@@ -69,17 +73,9 @@ class TestUnemploymentDataCleaning(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "No valid rows"):
             clean_unemployment_data(raw)
 
-
-if __name__ == "__main__":
-    unittest.main()
-
-
-    def test_trims_column_whitespace_before_required_column_validation(self):
-        raw = self.raw.rename(columns={
-            "Region": " Region ",
-            "Date": " Date ",
-        })
-        cleaned, audit = clean_unemployment_data(raw)
+    def test_trims_column_whitespace_before_validation(self):
+        raw = self.raw.rename(columns={"Region": " Region ", "Date": " Date "})
+        cleaned, _ = clean_unemployment_data(raw)
         self.assertEqual(len(cleaned), 2)
         self.assertIn("Region", cleaned.columns)
         self.assertIn("Date", cleaned.columns)
@@ -95,45 +91,52 @@ if __name__ == "__main__":
             clean_unemployment_data([{"Region": "A"}])
 
 
-def test_monthly_weighted_summary_groups_weeks_by_region_before_weighting():
-    from src.unemployment import summarize_monthly_unemployment
+class TestMonthlyUnemploymentSummary(unittest.TestCase):
+    def setUp(self):
+        self.raw = pd.DataFrame(
+            {
+                "Region": ["A", "A", "B"],
+                "Date": ["01-01-2020", "15-01-2020", "31-01-2020"],
+                "Estimated Unemployment Rate (%)": [10.0, 20.0, 30.0],
+                "Estimated Employed": [900.0, 800.0, 1600.0],
+                "Estimated Labour Participation Rate (%)": [90.0, 80.0, 80.0],
+            }
+        )
 
-    raw = pd.DataFrame({
-        "Region": ["A", "A", "B"],
-        "Date": ["01-01-2020", "15-01-2020", "31-01-2020"],
-        "Estimated Unemployment Rate (%)": [10.0, 20.0, 30.0],
-        "Estimated Employed": [900.0, 800.0, 1600.0],
-        "Estimated Labour Participation Rate (%)": [90.0, 80.0, 80.0],
-    })
-    result = summarize_monthly_unemployment(raw)
-    assert len(result) == 1
-    assert result.loc[0, "Month"] == "2020-01"
-    assert result.loc[0, "regions"] == 2
-    assert result.loc[0, "regional_mean_unemployment_pct"] == 22.5
-    assert result.loc[0, "labour_force_weighted_unemployment_pct"] == 25.0
+    def test_groups_observations_by_region_before_monthly_weighting(self):
+        result = summarize_monthly_unemployment(self.raw)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result.loc[0, "Month"], "2020-01")
+        self.assertEqual(result.loc[0, "regions"], 2)
+        self.assertAlmostEqual(result.loc[0, "regional_mean_unemployment_pct"], 22.5)
+        self.assertAlmostEqual(
+            result.loc[0, "labour_force_weighted_unemployment_pct"], 25.0
+        )
+
+    def test_rejects_out_of_range_unemployment_rate(self):
+        raw = self.raw.copy()
+        raw.loc[0, "Estimated Unemployment Rate (%)"] = 101
+        with self.assertRaisesRegex(ValueError, "between 0 and 100"):
+            summarize_monthly_unemployment(raw)
+
+    def test_rejects_zero_labour_participation(self):
+        raw = self.raw.copy()
+        raw.loc[0, "Estimated Labour Participation Rate (%)"] = 0
+        with self.assertRaisesRegex(ValueError, "greater than 0"):
+            summarize_monthly_unemployment(raw)
+
+    def test_rejects_non_finite_numeric_values(self):
+        raw = self.raw.copy()
+        raw.loc[0, "Estimated Employed"] = np.inf
+        with self.assertRaisesRegex(ValueError, "non-finite"):
+            summarize_monthly_unemployment(raw)
+
+    def test_rejects_missing_required_values(self):
+        raw = self.raw.copy()
+        raw.loc[0, "Date"] = "invalid-date"
+        with self.assertRaisesRegex(ValueError, "missing or invalid"):
+            summarize_monthly_unemployment(raw)
 
 
-def test_monthly_weighted_summary_rejects_invalid_rates():
-    from src.unemployment import summarize_monthly_unemployment
-
-    raw = pd.DataFrame({
-        "Region": ["A"], "Date": ["31-01-2020"],
-        "Estimated Unemployment Rate (%)": [101.0],
-        "Estimated Employed": [900.0],
-        "Estimated Labour Participation Rate (%)": [90.0],
-    })
-    with unittest.TestCase().assertRaisesRegex(ValueError, "between 0 and 100"):
-        summarize_monthly_unemployment(raw)
-
-
-def test_monthly_weighted_summary_rejects_zero_participation():
-    from src.unemployment import summarize_monthly_unemployment
-
-    raw = pd.DataFrame({
-        "Region": ["A"], "Date": ["31-01-2020"],
-        "Estimated Unemployment Rate (%)": [10.0],
-        "Estimated Employed": [900.0],
-        "Estimated Labour Participation Rate (%)": [0.0],
-    })
-    with unittest.TestCase().assertRaisesRegex(ValueError, "greater than 0"):
-        summarize_monthly_unemployment(raw)
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
