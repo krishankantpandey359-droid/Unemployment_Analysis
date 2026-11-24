@@ -27,7 +27,8 @@ Main fields:
 3. Normalize column names and validate required fields.
 4. Parse dates and numeric measures.
 5. Remove exact duplicate records and invalid rows.
-6. Calculate monthly means of the available regional unemployment rates.
+6. Calculate monthly summaries by first averaging repeated observations within each region.
+7. Plot both the unweighted mean of regional rates and an estimated labour-force-weighted rate. The weighted estimate infers labour force from employed people divided by the labour-participation rate.
 7. Compare unemployment across regions.
 8. Compare pre-COVID and COVID periods descriptively.
 9. Explore correlations among the supplied numeric fields.
@@ -35,7 +36,8 @@ Main fields:
 
 ## Interpretation and limitations
 
-- The monthly trend is the unweighted mean of available regional unemployment rates. It is not a population-weighted national unemployment estimate.
+- The notebook reports two monthly measures: an unweighted mean of regional unemployment rates and an estimated labour-force-weighted rate.
+- The weighted rate is inferred from supplied estimates. It is not an independently verified official national unemployment rate or a population-weighted estimate based on independently measured labour-force counts.
 - Region-level comparisons are descriptive. Differences in regional coverage and record counts can affect the mean.
 - The pre-COVID versus COVID comparison does not establish that COVID caused the observed changes.
 - Correlation does not establish causation.
@@ -52,6 +54,7 @@ Main fields:
 - Exact duplicate removal.
 - Range and finite-value validation.
 - A row-count audit before and after cleaning.
+- Monthly regional aggregation and an estimated labour-force-weighted unemployment summary.
 
 Run tests:
 
