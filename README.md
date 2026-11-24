@@ -29,10 +29,10 @@ Main fields:
 5. Remove exact duplicate records and invalid rows.
 6. Calculate monthly summaries by first averaging repeated observations within each region.
 7. Plot both the unweighted mean of regional rates and an estimated labour-force-weighted rate. The weighted estimate infers labour force from employed people divided by the labour-participation rate.
-7. Compare unemployment across regions.
-8. Compare pre-COVID and COVID periods descriptively.
-9. Explore correlations among the supplied numeric fields.
-10. Visualize the main patterns.
+8. Compare unemployment across regions.
+9. Compare pre-COVID and COVID periods descriptively.
+10. Explore correlations among the supplied numeric fields.
+11. Visualize the main patterns.
 
 ## Interpretation and limitations
 
@@ -72,4 +72,4 @@ Srishti Pandey, MCA Data Science
 
 ## Latest GitHub Actions validation
 
-Latest verified successful main-branch workflow run checked on 24 November 2026: [GitHub Actions run #45312140415](https://github.com/krishankantpandey359-droid/Unemployment_Analysis/actions/runs/45312140415). This run verifies the checks configured in this repository's workflow; it does not replace manual testing of features outside CI.
+Latest successful notebook and validation workflow on this PR branch before this documentation refresh: [GitHub Actions run #45447709371](https://github.com/krishankantpandey359-droid/Unemployment_Analysis/actions/runs/45447709371). It executed the PR notebook and tests; it does not verify features outside the configured checks.
