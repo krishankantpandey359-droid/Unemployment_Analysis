@@ -66,3 +66,7 @@ Python, Pandas, NumPy, Matplotlib, Seaborn, Jupyter Notebook, and GitHub Actions
 ## Author
 
 Srishti Pandey, MCA Data Science
+
+## Latest GitHub Actions validation
+
+Latest verified successful main-branch workflow run checked on 24 November 2026: [GitHub Actions run #45312140415](https://github.com/krishankantpandey359-droid/Unemployment_Analysis/actions/runs/45312140415). This run verifies the checks configured in this repository's workflow; it does not replace manual testing of features outside CI.
