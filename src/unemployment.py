@@ -13,6 +13,17 @@ REQUIRED_COLUMNS = [
 ]
 NUMERIC_COLUMNS = REQUIRED_COLUMNS[2:]
 
+def _parse_source_dates(values: pd.Series) -> pd.Series:
+    """Parse source DD-MM-YYYY strings and preserve already-parsed dates."""
+    if pd.api.types.is_datetime64_any_dtype(values):
+        return pd.to_datetime(values, errors="coerce")
+    return pd.to_datetime(
+        values.astype("string").str.strip(),
+        format="%d-%m-%Y",
+        errors="coerce",
+    )
+
+
 
 def clean_unemployment_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """Validate, normalize and clean a copy of the supplied regional dataset."""
@@ -27,11 +38,7 @@ def clean_unemployment_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
     df["Region"] = df["Region"].astype("string").str.strip()
-    df["Date"] = pd.to_datetime(
-        df["Date"].astype("string").str.strip(),
-        format="%d-%m-%Y",
-        errors="coerce",
-    )
+    df["Date"] = _parse_source_dates(df["Date"])
 
     for column in NUMERIC_COLUMNS:
         df[column] = pd.to_numeric(df[column], errors="coerce")
@@ -86,11 +93,7 @@ def summarize_monthly_unemployment(df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError(f"Missing required columns: {missing}")
 
     data["Region"] = data["Region"].astype("string").str.strip()
-    data["Date"] = pd.to_datetime(
-        data["Date"].astype("string").str.strip(),
-        format="%d-%m-%Y",
-        errors="coerce",
-    )
+    data["Date"] = _parse_source_dates(data["Date"])
     for column in NUMERIC_COLUMNS:
         data[column] = pd.to_numeric(data[column], errors="coerce")
 
