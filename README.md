@@ -35,9 +35,9 @@ Main fields:
 
 ## Interpretation and limitations
 
-- The current `main` notebook reports the unweighted mean of available regional unemployment rates. It is not a population-weighted national estimate.
-- `src/unemployment.py` also provides an estimated labour-force-weighted summary helper. Integrating that helper into the notebook is proposed in [PR #6](https://github.com/krishankantpandey359-droid/Unemployment_Analysis/pull/6); the notebook integration is not yet part of `main`.
-- The weighted result is inferred from supplied employment and labour-participation estimates, not independently measured labour-force counts. It would be an approximation, not an official national unemployment estimate.
+- The `main` notebook reports both the unweighted mean of regional unemployment rates and an estimated labour-force-weighted rate.
+- Repeated observations are first averaged within each region and month, so regions with more weekly records do not receive extra weight.
+- The weighted result is inferred from supplied employment and labour-participation estimates, not independently measured labour-force counts. It is an approximation, not an official national unemployment estimate.
 - Region-level comparisons are descriptive. Differences in regional coverage and record counts can affect the mean.
 - The pre-COVID versus COVID comparison does not establish that COVID caused the observed changes.
 - Correlation does not establish causation.
