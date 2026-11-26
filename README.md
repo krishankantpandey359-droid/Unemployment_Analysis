@@ -11,7 +11,7 @@ The notebook loads the public CSV from the following source:
 - [Unemployment_Rate_upto_11_2020.csv, GitHub source](https://raw.githubusercontent.com/SaiyamTuteja/EMPLOYMENT_AND_UNEMPLOYMENT_DATA_ANALYSIS/master/Unemployment_Rate_upto_11_2020.csv)
 - [Upstream repository](https://github.com/SaiyamTuteja/EMPLOYMENT_AND_UNEMPLOYMENT_DATA_ANALYSIS)
 
-The filename indicates coverage through November 2020. The analysis should be treated as a historical dataset exercise, not a current unemployment dashboard. The repository does not bundle a fixed CSV snapshot, so rerunning the notebook depends on the availability and unchanged contents of the upstream file.
+The upstream filename includes `upto_11_2020`, but the CSV snapshot inspected for this audit contains observations from January through October 2020, with 31 October 2020 as the latest recorded date. The analysis is a historical dataset exercise, not a current unemployment dashboard. The repository does not bundle a fixed CSV snapshot, so rerunning the notebook depends on the availability and unchanged contents of the upstream file.
 
 Main fields:
 - Region
@@ -41,7 +41,7 @@ Main fields:
 - Region-level comparisons are descriptive. Differences in regional coverage and record counts can affect the mean.
 - The pre-COVID versus COVID comparison does not establish that COVID caused the observed changes.
 - Correlation does not establish causation.
-- The data ends around November 2020 based on the source file name. It does not represent current labour-market conditions.
+- The inspected CSV records end on 31 October 2020, despite the upstream filename containing `upto_11_2020`. It does not represent current labour-market conditions.
 - The upstream CSV is fetched at notebook runtime and is not pinned to a commit in this repository. For strict reproducibility, archive an approved snapshot with its retrieval date and checksum.
 - Cleaning rules remove rows with invalid dates, non-finite values, out-of-range percentage values, negative employment, or blank region names. Review the audit output before interpreting results.
 
